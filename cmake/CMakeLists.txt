@@ -1,5 +1,5 @@
 # 设置编译后的可执行文件名称并指定变量名
-SET(EXE_NAME SipSupService)
+SET(EXE_NAME SipSubService)
 # 判断当前使用的操作系统
 MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 # 在编译选项中开启所有警告并支持c++11支持
