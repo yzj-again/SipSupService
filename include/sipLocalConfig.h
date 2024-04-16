@@ -2,7 +2,6 @@
 #define _SIPLOCALCONFIG_H
 #include "confReader.h"
 #include "common.h"
-#define CONFIGFILE_PATH "/home/zijianye/cpp_project/SipSupService/conf/sipSupService.conf"
 class SipLocalConfig
 {
 public:
@@ -18,9 +17,9 @@ private:
     int m_localPort;
     std::string m_sipIp;
     int m_sipPort;
-    std::string m_subNodeIp;
-    int m_subNodePort;
-    int m_subNodePoto;
-    int m_subNodeAuth;
+    std::string m_supNodeIp;
+    int m_supNodePort;
+    int m_supNodePoto;
+    int m_supNodeAuth;
 };
 #endif // !_SIPLOCALCONFIG_H

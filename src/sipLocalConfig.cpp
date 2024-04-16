@@ -1,6 +1,6 @@
 #include "sipLocalConfig.h"
 
-#define CONFIGFILE_PATH "/home/zijianye/cpp_project/SipSupService/conf/sipSupService.conf"
+#define CONFIGFILE_PATH "../conf/sipSubService.conf"
 #define LOCAL_SECTION "localserver"
 #define SIP_SECTION "sipserver"
 
@@ -9,11 +9,11 @@ static const std::string keyLocalPort = "local_port";
 static const std::string keySipIp = "sip_ip";
 static const std::string keySipPort = "sip_port";
 
-static const std::string keySubNodeNum = "subnode_num";
-static const std::string keySubNodeIp = "sip_subnode_ip";
-static const std::string keySubNodePort = "sip_subnode_port";
-static const std::string keySubNodePoto = "sip_subnode_poto";
-static const std::string keySubNodeAuth = "sip_subnode_auth";
+static const std::string keySupNodeNum = "supnode_num";
+static const std::string keySupNodeIp = "sip_supnode_ip";
+static const std::string keySupNodePort = "sip_supnode_port";
+static const std::string keySupNodePoto = "sip_supnode_poto";
+static const std::string keySupNodeAuth = "sip_supnode_auth";
 
 SipLocalConfig::SipLocalConfig() : m_conf(CONFIGFILE_PATH)
 {
@@ -21,10 +21,10 @@ SipLocalConfig::SipLocalConfig() : m_conf(CONFIGFILE_PATH)
     m_localPort = 0;
     m_sipIp = "";
     m_sipPort = 0;
-    m_subNodeIp = "";
-    m_subNodePort = 0;
-    m_subNodePoto = 0;
-    m_subNodeAuth = 0;
+    m_supNodeIp = "";
+    m_supNodePort = 0;
+    m_supNodePoto = 0;
+    m_supNodeAuth = 0;
 }
 SipLocalConfig::~SipLocalConfig() {}
 int SipLocalConfig::ReadConf()
@@ -57,18 +57,18 @@ int SipLocalConfig::ReadConf()
         ret = -1;
         LOG(ERROR) << "sip port is wrong";
     }
-    int num = m_conf.readInt(keySubNodeNum);
+    int num = m_conf.readInt(keySupNodeNum);
     for (int i = 0; i < num; i++)
     {
-        std::string ip = keySubNodeIp + to_string(i);
+        std::string ip = keySupNodeIp + to_string(i);
         std::string port = keySipPort + to_string(i);
-        std::string poto = keySubNodePoto + to_string(i);
-        std::string auth = keySubNodeAuth + to_string(i);
-        m_subNodeIp = m_conf.readStr(ip);
-        m_subNodePort = m_conf.readInt(port);
-        m_subNodePoto = m_conf.readInt(poto);
-        m_subNodeAuth = m_conf.readInt(auth);
-        LOG(INFO) << "local ip " << m_subNodeIp << "local port " << m_subNodePort;
+        std::string poto = keySupNodePoto + to_string(i);
+        std::string auth = keySupNodeAuth + to_string(i);
+        m_supNodeIp = m_conf.readStr(ip);
+        m_supNodePort = m_conf.readInt(port);
+        m_supNodePoto = m_conf.readInt(poto);
+        m_supNodeAuth = m_conf.readInt(auth);
+        LOG(INFO) << "local ip " << m_supNodeIp << "local port " << m_supNodePort;
     }
 
     return ret;
