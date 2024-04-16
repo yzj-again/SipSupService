@@ -1,7 +1,49 @@
 #include "sipCore.h"
 #include "common.h"
 #include "sipDefine.h"
-SipCore::SipCore() : m_endpt(nullptr) {}
+
+static int pollingEvent(void *arg)
+{
+    LOG(INFO) << "polling event thread start success";
+    pjsip_endpoint *ept = (pjsip_endpoint *)arg;
+    while (true)
+    {
+        // 轮询处理endPoint事务 时间一到就返回
+        pj_time_val timeout = {0, 500};
+        pj_status_t status = pjsip_endpt_handle_events(ept, &timeout);
+        if (PJ_SUCCESS != status)
+        {
+            LOG(ERROR) << "polling event faild, code: " << status;
+            return -1;
+        }
+    }
+    return 0;
+}
+
+pj_bool_t on_rx_request(pjsip_rx_data *rdata)
+{
+    return PJ_SUCCESS;
+}
+static pjsip_module recv_mod = {
+    NULL,
+    NULL,
+    // 移除常量属性并转换为 char*
+    {const_cast<char *>("mod-recv"), 8},
+    -1,
+    PJSIP_MOD_PRIORITY_APPLICATION,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    on_rx_request,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+SipCore::SipCore() : m_endpt(nullptr)
+{
+}
 SipCore::~SipCore()
 {
     pjsip_endpt_destroy(m_endpt);
@@ -17,11 +59,13 @@ bool SipCore::initSip(int sipPort)
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "init pjlib faild, code: " << status;
+            break;
         }
         status = pjlib_util_init();
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "init pjlib util faild, code: " << status;
+            break;
         }
         // 初始化pjsip内存池
         pj_caching_pool cachingPool;
@@ -33,24 +77,49 @@ bool SipCore::initSip(int sipPort)
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "create endpoint faild, code: " << status;
+            break;
         }
         // 事务 transaction
         status = pjsip_tsx_layer_init_module(m_endpt);
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "init tsx layer faild, code: " << status;
+            break;
         }
         // dialog模块
         status = pjsip_ua_init_module(m_endpt, NULL);
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "init ua layer faild, code: " << status;
+            break;
         }
         // 传输层模块
         status = init_transport_layer(sipPort);
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "init transport layer faild, code: " << status;
+            break;
+        }
+        // 应用层模块
+        status = pjsip_endpt_register_module(m_endpt, &recv_mod);
+        if (PJ_SUCCESS != status)
+        {
+            LOG(ERROR) << "register recv module faild, code: " << status;
+            break;
+        }
+        // endpoint内存池分配
+        pj_pool_t *pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
+        if (pool == NULL)
+        {
+            LOG(ERROR) << "create pool faild, code: " << status;
+            break;
+        }
+        pj_thread_t *eventThread = NULL;
+        status = pj_thread_create(pool, NULL, pollingEvent, m_endpt, 0, 0, &eventThread);
+        if (PJ_SUCCESS != status)
+        {
+            LOG(ERROR) << "create pjsip thread faild, code: " << status;
+            break;
         }
     } while (0);
     bool bret = true;
