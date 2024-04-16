@@ -17,5 +17,14 @@ bool GlobalControl::init(void *param)
     {
         return false;
     }
+    if (!g_threadPool)
+    {
+        g_threadPool = new ThreadPool();
+        int ret = g_threadPool->createThreadPool(10);
+        if (ret < 0)
+        {
+            LOG(ERROR) << "create threadPool error";
+        }
+    }
     return true;
 }
