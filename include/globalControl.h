@@ -3,6 +3,7 @@
 #include "common.h"
 #include "sipLocalConfig.h"
 #include "threadPool.h"
+#include "sipCore.h"
 // 前置声明
 class GlobalControl;
 #define GOBJ(obj) GlobalControl::instance()->obj
@@ -13,6 +14,7 @@ public:
     bool init(void *param);
     SipLocalConfig *g_config = nullptr;
     ThreadPool *g_threadPool = nullptr;
+    SipCore *g_sipServer = nullptr;
 
 private:
     GlobalControl(){};

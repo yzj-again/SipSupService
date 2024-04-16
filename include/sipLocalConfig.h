@@ -10,6 +10,7 @@ public:
     ~SipLocalConfig();
     int ReadConf();
     inline std::string localIp() { return m_localIp; }
+    inline int sipPort() { return m_sipPort; }
 
 private:
     ConfReader m_conf;

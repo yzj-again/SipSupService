@@ -38,7 +38,7 @@ int ThreadPool::createThreadPool(int threadCount)
 void *ThreadPool::mainThread(void *argc)
 {
     ThreadPool *pthis = (ThreadPool *)argc;
-    while (1)
+    while (true)
     {
         // 阻塞
         int ret = pthis->waitTask();

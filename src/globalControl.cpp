@@ -26,5 +26,10 @@ bool GlobalControl::init(void *param)
             LOG(ERROR) << "create threadPool error";
         }
     }
+    if (!g_sipServer)
+    {
+        g_sipServer = new SipCore();
+    }
+    g_sipServer->initSip(g_config->sipPort());
     return true;
 }
