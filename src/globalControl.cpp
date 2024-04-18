@@ -1,5 +1,6 @@
 #include "globalControl.h"
 GlobalControl *GlobalControl::m_pInstance = nullptr;
+SUPDOMAININFOLISTS GlobalControl::m_supDomainInfoLists;
 GlobalControl *GlobalControl::instance()
 {
     // 判断类实例是否有效
@@ -17,6 +18,17 @@ bool GlobalControl::init(void *param)
     {
         return false;
     }
+    SupDomainInfo info;
+    for (auto it : g_config->upNodeInfoList)
+    {
+        info.sipId = it.id;
+        info.addrIp = it.ip;
+        info.sipPort = it.port;
+        info.protocal = it.poto;
+        info.expire = it.expire;
+        m_supDomainInfoLists.push_back(info);
+    }
+    LOG(INFO) << "m_supDomainInfoLists.size()" << m_supDomainInfoLists.size();
     if (!g_threadPool)
     {
         g_threadPool = new ThreadPool();

@@ -25,6 +25,7 @@
 #include "sipLocalConfig.h"
 #include "globalControl.h"
 #include "ecThread.h"
+#include "sipRegister.h"
 using namespace EC;
 class SetGlogLevel
 {
@@ -93,6 +94,7 @@ int main(int argc, const char **argv)
     }
     LOG(INFO) << "create thread pid: " << pid;
     LOG(INFO) << "main thread pid: " << pthread_self();
+    sipRegister *regc = new sipRegister();
     while (true)
     {
         sleep(30);

@@ -68,12 +68,12 @@ bool SipCore::initSip(int sipPort)
             break;
         }
         // 初始化pjsip内存池
-        pj_caching_pool cachingPool;
-        pj_caching_pool_init(&cachingPool, NULL, SIP_STACK_SIZE);
+
+        pj_caching_pool_init(&m_cachingPool, NULL, SIP_STACK_SIZE);
         // 初始化四个重要模块
         // 一个pjsip对象只有一个endpoint对象，其他模块对象都是由endpoint对象来进行管理
         // 内存池工厂对象
-        status = pjsip_endpt_create(&cachingPool.factory, NULL, &m_endpt);
+        status = pjsip_endpt_create(&m_cachingPool.factory, NULL, &m_endpt);
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "create endpoint faild, code: " << status;

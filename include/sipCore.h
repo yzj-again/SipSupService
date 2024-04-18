@@ -13,8 +13,10 @@ public:
     ~SipCore();
     bool initSip(int sipPort);
     pj_status_t init_transport_layer(int sipPort);
+    inline pjsip_endpoint *getEndpoint() { return m_endpt; }
 
 private:
     pjsip_endpoint *m_endpt;
+    pj_caching_pool m_cachingPool;
 };
 #endif // !_SIPCORE_H
