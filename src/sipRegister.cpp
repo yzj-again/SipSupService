@@ -1,7 +1,8 @@
 #include "sipRegister.h"
 #include "common.h"
+#include "sipMessage.h"
 
-static void client_cb(struct pjsip_regc_cbparam *param)
+void client_cb(struct pjsip_regc_cbparam *param)
 {
     LOG(INFO) << "code " << param->code;
     if (param->code == 200)
@@ -11,45 +12,61 @@ static void client_cb(struct pjsip_regc_cbparam *param)
     }
     return;
 }
-sipRegister::sipRegister()
+void sipRegister::RegisterProc(void *param)
 {
+    sipRegister *pthis = (sipRegister *)param;
     for (auto it : GlobalControl::instance()->getSupNodeDomainInfoLists())
     {
         if (!it.registered)
         {
-            if (gbRegister(it) < 0)
+            if (pthis->gbRegister(it) < 0)
             {
                 LOG(ERROR) << "register error for " << it.sipId;
             }
         }
     }
 }
+sipRegister::sipRegister()
+{
+    m_registerTimer = new TaskTimer(3);
+}
 sipRegister::~sipRegister()
 {
+    if (m_registerTimer)
+    {
+        delete m_registerTimer;
+        m_registerTimer = nullptr;
+    }
+}
+
+void sipRegister::gbRegisterServiceStart()
+{
+    if (m_registerTimer)
+    {
+        m_registerTimer->setTimerFunc(sipRegister::RegisterProc, (void *)this);
+        m_registerTimer->start();
+    }
 }
 int sipRegister::gbRegister(SupDomainInfo &node)
 {
     // 循环的对list发送请求
-    char fromHeader[128] = {0};
-    sprintf(fromHeader, "<sip:%s@%s>", GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str());
-    char toHeader[128] = {0};
-    sprintf(toHeader, "<sip:%s@%s>", GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str());
-    char requestUrl[128] = {0};
+    sipMessage msg;
+    msg.setFrom(GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str());
+    msg.setTo(GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str());
     if (node.protocal == 1)
     {
-        sprintf(requestUrl, "sip:%s@%s:%d;transport=%s", node.sipId.c_str(), node.addrIp.c_str(), node.sipPort, "tcp");
+        msg.setUrl(node.sipId.c_str(), node.addrIp.c_str(), node.sipPort, (char *)"tcp");
     }
     else
     {
-        sprintf(requestUrl, "sip:%s@%s:%d;transport=%s", node.sipId.c_str(), node.addrIp.c_str(), node.sipPort, "udp");
+        msg.setUrl(node.sipId.c_str(), node.addrIp.c_str(), node.sipPort);
     }
-    char contactUrl[128] = {0};
-    sprintf(contactUrl, "sip:%s@%s:%d", GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str(), GOBJ(g_config)->sipPort());
+    msg.setContact(GOBJ(g_config)->sipId().c_str(), GOBJ(g_config)->sipIp().c_str(), GOBJ(g_config)->sipPort());
 
-    pj_str_t from = pj_str(fromHeader);
-    pj_str_t to = pj_str(toHeader);
-    pj_str_t line = pj_str(requestUrl);
-    pj_str_t contact = pj_str(contactUrl);
+    pj_str_t from = pj_str(msg.FromHeader());
+    pj_str_t to = pj_str(msg.ToHeader());
+    pj_str_t line = pj_str(msg.RequestUrl());
+    pj_str_t contact = pj_str(msg.Contact());
     // 定义一个sip客户端注册结构体的变量
     pj_status_t status = PJ_SUCCESS;
     do
@@ -85,5 +102,10 @@ int sipRegister::gbRegister(SupDomainInfo &node)
             break;
         }
     } while (0);
-    return true;
+    int ret = 0;
+    if (PJ_SUCCESS != status)
+    {
+        ret = -1;
+    }
+    return ret;
 }

@@ -95,6 +95,7 @@ int main(int argc, const char **argv)
     LOG(INFO) << "create thread pid: " << pid;
     LOG(INFO) << "main thread pid: " << pthread_self();
     sipRegister *regc = new sipRegister();
+    regc->gbRegisterServiceStart();
     while (true)
     {
         sleep(30);
