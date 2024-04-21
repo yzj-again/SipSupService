@@ -28,7 +28,7 @@ SipLocalConfig::SipLocalConfig() : m_conf(CONFIGFILE_PATH)
     m_supNodeIp = "";
     m_supNodePort = 0;
     m_supNodePoto = 0;
-    m_supNodeAuth = 0;
+    // m_supNodeAuth = 0;
     m_supNodeExpire = 0;
 }
 SipLocalConfig::~SipLocalConfig() {}
@@ -78,13 +78,13 @@ int SipLocalConfig::ReadConf()
         std::string ip = keySupNodeIp + to_string(i);
         std::string port = keySupNodePort + to_string(i);
         std::string poto = keySupNodePoto + to_string(i);
-        std::string auth = keySupNodeAuth + to_string(i);
+        // std::string auth = keySupNodeAuth + to_string(i);
         std::string expire = keySupNodeExpire + to_string(i);
         info.id = m_conf.readStr(id);
         info.ip = m_conf.readStr(ip);
         info.port = m_conf.readInt(port);
         info.poto = m_conf.readInt(poto);
-        info.auth = m_conf.readInt(auth);
+        // info.auth = m_conf.readInt(auth);
         info.expire = m_conf.readInt(expire);
         upNodeInfoList.push_back(info);
         // LOG(INFO) << "subnodeip:" << m_supNodeIp << ",subnodeport:" << m_supNodePort

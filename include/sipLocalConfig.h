@@ -9,7 +9,7 @@ struct SupNodeInfo
     std::string ip;
     int port;
     int poto;
-    int auth;
+    // int auth;
     int expire;
 };
 
@@ -35,7 +35,7 @@ private:
     std::string m_supNodeIp;
     int m_supNodePort;
     int m_supNodePoto;
-    int m_supNodeAuth;
+    // int m_supNodeAuth;
     int m_supNodeExpire;
 };
 #endif // !_SIPLOCALCONFIG_H

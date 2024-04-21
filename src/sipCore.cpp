@@ -1,6 +1,7 @@
 #include "sipCore.h"
 #include "common.h"
 #include "sipDefine.h"
+#include "globalControl.h"
 
 static int pollingEvent(void *arg)
 {
