@@ -15,6 +15,9 @@ void client_cb(struct pjsip_regc_cbparam *param)
 void sipRegister::RegisterProc(void *param)
 {
     sipRegister *pthis = (sipRegister *)param;
+    // this全局共享
+    // GlobalControl::getGlobalLock();
+    AutoMutexLock lock(&(GlobalControl::g_lock));
     for (auto it : GlobalControl::instance()->getSupNodeDomainInfoLists())
     {
         if (!it.registered)
@@ -25,6 +28,7 @@ void sipRegister::RegisterProc(void *param)
             }
         }
     }
+    // GlobalControl::freeGlobalLock();
 }
 sipRegister::sipRegister()
 {

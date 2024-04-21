@@ -6,7 +6,7 @@ static int pollingEvent(void *arg)
 {
     LOG(INFO) << "polling event thread start success";
     pjsip_endpoint *ept = (pjsip_endpoint *)arg;
-    while (true)
+    while (!(GlobalControl::g_stopPool))
     {
         // 轮询处理endPoint事务 时间一到就返回
         pj_time_val timeout = {0, 500};
@@ -47,6 +47,10 @@ SipCore::SipCore() : m_endpt(nullptr)
 SipCore::~SipCore()
 {
     pjsip_endpt_destroy(m_endpt);
+    // 释放缓冲池
+    pj_caching_pool_destroy(&m_cachingPool);
+    pj_shutdown();
+    GlobalControl::g_stopPool = true;
 }
 bool SipCore::initSip(int sipPort)
 {

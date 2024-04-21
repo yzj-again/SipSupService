@@ -1,6 +1,8 @@
 #include "globalControl.h"
 GlobalControl *GlobalControl::m_pInstance = nullptr;
 SUPDOMAININFOLISTS GlobalControl::m_supDomainInfoLists;
+pthread_mutex_t GlobalControl::g_lock = PTHREAD_MUTEX_INITIALIZER;
+bool GlobalControl::g_stopPool = false;
 GlobalControl *GlobalControl::instance()
 {
     // 判断类实例是否有效

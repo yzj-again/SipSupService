@@ -1,5 +1,6 @@
 #include "TaskTimer.h"
 #include "ecThread.h"
+#include "globalControl.h"
 using namespace EC;
 void *TaskTimer::timer(void *context)
 {
@@ -20,7 +21,12 @@ void *TaskTimer::timer(void *context)
             // 更新时间，执行定时器函数
             lastTime = curTime;
             if (pthis->m_timerFn != nullptr)
+            {
+                // pjlib线程注册
+                pj_thread_desc desc;
+                pjcall_thread_register(desc);
                 pthis->m_timerFn(pthis->m_fnParam);
+            }
         }
         else
         {
