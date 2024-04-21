@@ -1,12 +1,15 @@
 #include "sipCore.h"
 #include "common.h"
 #include "sipDefine.h"
-
+#include "globalControl.h"
+#include "SipRegister.h"
+#include "ecThread.h"
+using namespace EC;
 static int pollingEvent(void *arg)
 {
     LOG(INFO) << "polling event thread start success";
     pjsip_endpoint *ept = (pjsip_endpoint *)arg;
-    while (true)
+    while (!(GlobalControl::g_stopPool))
     {
         // 轮询处理endPoint事务 时间一到就返回
         pj_time_val timeout = {0, 500};
@@ -19,9 +22,49 @@ static int pollingEvent(void *arg)
     }
     return 0;
 }
-
+void *SipCore::dealTaskThread(void *arg)
+{
+    threadParam *param = (threadParam *)arg;
+    if (!param || param->base == nullptr)
+    {
+        return nullptr;
+    }
+    // pjlib线程注册
+    pj_thread_desc desc;
+    pjcall_thread_register(desc);
+    param->base->run(param->data);
+    delete param;
+    param = nullptr;
+}
 pj_bool_t on_rx_request(pjsip_rx_data *rdata)
 {
+    // 回调中接收包，完成业务
+    LOG(INFO) << "request msg coming";
+    // 根据请求的方法完成不同的业务
+    if (nullptr == rdata || nullptr == rdata->msg_info.msg)
+    {
+        return PJ_FALSE;
+    }
+    threadParam *param = new threadParam();
+    pjsip_rx_data_clone(rdata, 0, &param->data);
+    pjsip_msg *msg = rdata->msg_info.msg;
+    if (msg->line.req.method.id == PJSIP_REGISTER_METHOD)
+    {
+        param->base = new SipRegister();
+    }
+    pthread_t pid;
+    int ret = EC::ECThread::createThread(SipCore::dealTaskThread, param, pid);
+    if (ret != 0)
+    {
+        LOG(ERROR) << "create task thread error";
+        if (param)
+        {
+            delete param;
+            param = NULL;
+        }
+        return PJ_FALSE;
+    }
+
     return PJ_SUCCESS;
 }
 static pjsip_module recv_mod = {
@@ -47,6 +90,10 @@ SipCore::SipCore() : m_endpt(nullptr)
 SipCore::~SipCore()
 {
     pjsip_endpt_destroy(m_endpt);
+    // 释放缓冲池
+    pj_caching_pool_destroy(&m_cachingPool);
+    pj_shutdown();
+    GlobalControl::g_stopPool = true;
 }
 bool SipCore::initSip(int sipPort)
 {
@@ -68,12 +115,12 @@ bool SipCore::initSip(int sipPort)
             break;
         }
         // 初始化pjsip内存池
-        pj_caching_pool cachingPool;
-        pj_caching_pool_init(&cachingPool, NULL, SIP_STACK_SIZE);
+
+        pj_caching_pool_init(&m_cachingPool, NULL, SIP_STACK_SIZE);
         // 初始化四个重要模块
         // 一个pjsip对象只有一个endpoint对象，其他模块对象都是由endpoint对象来进行管理
         // 内存池工厂对象
-        status = pjsip_endpt_create(&cachingPool.factory, NULL, &m_endpt);
+        status = pjsip_endpt_create(&m_cachingPool.factory, NULL, &m_endpt);
         if (PJ_SUCCESS != status)
         {
             LOG(ERROR) << "create endpoint faild, code: " << status;

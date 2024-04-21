@@ -6,10 +6,12 @@
 
 static const std::string keyLocalIp = "local_ip";
 static const std::string keyLocalPort = "local_port";
+static const std::string keySipId = "sip_id";
 static const std::string keySipIp = "sip_ip";
 static const std::string keySipPort = "sip_port";
 
 static const std::string keySubNodeNum = "subnode_num";
+static const std::string keySubNodeId = "sip_subnode_id";
 static const std::string keySubNodeIp = "sip_subnode_ip";
 static const std::string keySubNodePort = "sip_subnode_port";
 static const std::string keySubNodePoto = "sip_subnode_poto";
@@ -19,6 +21,7 @@ SipLocalConfig::SipLocalConfig() : m_conf(CONFIGFILE_PATH)
 {
     m_localIp = "";
     m_localPort = 0;
+    m_sipId = "";
     m_sipIp = "";
     m_sipPort = 0;
     m_subNodeIp = "";
@@ -45,6 +48,12 @@ int SipLocalConfig::ReadConf()
     }
 
     m_conf.setSection(SIP_SECTION);
+    m_sipId = m_conf.readStr(keySipId);
+    if (m_sipId.empty())
+    {
+        ret = -1;
+        LOG(ERROR) << "sip id is wrong";
+    }
     m_sipIp = m_conf.readStr(keySipIp);
     if (m_sipIp.empty())
     {
@@ -58,17 +67,20 @@ int SipLocalConfig::ReadConf()
         LOG(ERROR) << "sip port is wrong";
     }
     int num = m_conf.readInt(keySubNodeNum);
+    SupNodeInfo info;
     for (int i = 0; i < num; i++)
     {
+        std::string id = keySubNodeId + to_string(i);
         std::string ip = keySubNodeIp + to_string(i);
         std::string port = keySipPort + to_string(i);
         std::string poto = keySubNodePoto + to_string(i);
         std::string auth = keySubNodeAuth + to_string(i);
-        m_subNodeIp = m_conf.readStr(ip);
-        m_subNodePort = m_conf.readInt(port);
-        m_subNodePoto = m_conf.readInt(poto);
-        m_subNodeAuth = m_conf.readInt(auth);
-        LOG(INFO) << "local ip " << m_subNodeIp << "local port " << m_subNodePort;
+        info.id = m_conf.readStr(id);
+        info.ip = m_conf.readStr(ip);
+        info.port = m_conf.readInt(port);
+        info.poto = m_conf.readInt(poto);
+        info.auth = m_conf.readInt(auth);
+        supNodeInfoList.push_back(info);
     }
 
     return ret;
