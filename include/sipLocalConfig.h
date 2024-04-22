@@ -3,6 +3,7 @@
 #include "confReader.h"
 #include "common.h"
 #include <list>
+#include <algorithm>
 #define CONFIGFILE_PATH "/home/zijianye/cpp_project/SipSupService/conf/sipSupService.conf"
 
 struct SupNodeInfo

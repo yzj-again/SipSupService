@@ -17,6 +17,10 @@ typedef struct _SubDomainInfo
         expire = 0;
         registered = false;
     }
+    bool operator==(std::string id)
+    {
+        return (this->sipId == id);
+    }
     std::string sipId;
     std::string addrIp;
     int sipPort;
@@ -49,6 +53,10 @@ public:
     static pthread_mutex_t g_lock;
     // 控制服务进程退出标识
     static bool g_stopPool;
+
+public:
+    static bool checkIsExist(std::string id);
+    static void setExpires(std::string id, int expires);
 
 private:
     GlobalControl(){};

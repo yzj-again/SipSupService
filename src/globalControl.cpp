@@ -46,3 +46,25 @@ bool GlobalControl::init(void *param)
     g_sipServer->initSip(g_config->sipPort());
     return true;
 }
+bool GlobalControl::checkIsExist(string id)
+{
+    AutoMutexLock lck(&g_lock);
+    SUBDOMAININFOLISTS::iterator it;
+    it = std::find(m_subDomainInfoLists.begin(), m_subDomainInfoLists.end(), id);
+    if (it != m_subDomainInfoLists.end())
+    {
+        return true;
+    }
+    return false;
+}
+
+void GlobalControl::setExpires(string id, int expires)
+{
+    AutoMutexLock lck(&g_lock);
+    SUBDOMAININFOLISTS::iterator it;
+    it = std::find(m_subDomainInfoLists.begin(), m_subDomainInfoLists.end(), id);
+    if (it != m_subDomainInfoLists.end())
+    {
+        it->expire = expires;
+    }
+}
