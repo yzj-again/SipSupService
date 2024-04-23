@@ -99,7 +99,7 @@ bool SipCore::initSip(int sipPort)
 {
     pj_status_t status;
     // 0-关闭， 6-详细
-    pj_log_set_level(6);
+    pj_log_set_level(0);
     do
     {
         status = pj_init();
