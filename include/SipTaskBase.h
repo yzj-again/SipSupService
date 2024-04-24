@@ -15,6 +15,10 @@ public:
     SipTaskBase() {}
     virtual ~SipTaskBase(){};
     virtual pj_status_t run(pjsip_rx_data *rdata) = 0;
+
+protected:
+    // 只能由派生类调用
+    std::string parseFromId(pjsip_msg *msg);
 };
 
 #endif // !_SIPTASKBASE_H

@@ -13,8 +13,16 @@
 class AutoMutexLock
 {
 public:
-    AutoMutexLock(pthread_mutex_t *lock) : lock(lock) { getLock(); };
-    ~AutoMutexLock() { freeLock(); };
+    AutoMutexLock(pthread_mutex_t *lock) : lock(lock)
+    {
+        LOG(INFO) << "getLock";
+        getLock();
+    };
+    ~AutoMutexLock()
+    {
+        LOG(INFO) << "freeLock";
+        freeLock();
+    };
 
 private:
     AutoMutexLock();

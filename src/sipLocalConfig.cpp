@@ -9,6 +9,7 @@ static const std::string keyLocalPort = "local_port";
 static const std::string keySipId = "sip_id";
 static const std::string keySipIp = "sip_ip";
 static const std::string keySipPort = "sip_port";
+static const std::string keySipRealm = "sip_realm";
 
 static const std::string keySubNodeNum = "subnode_num";
 static const std::string keySubNodeId = "sip_subnode_id";
@@ -24,6 +25,7 @@ SipLocalConfig::SipLocalConfig() : m_conf(CONFIGFILE_PATH)
     m_sipId = "";
     m_sipIp = "";
     m_sipPort = 0;
+    m_sipRealm = "";
     m_subNodeIp = "";
     m_subNodePort = 0;
     m_subNodePoto = 0;
@@ -65,6 +67,13 @@ int SipLocalConfig::ReadConf()
     {
         ret = -1;
         LOG(ERROR) << "sip port is wrong";
+    }
+    m_sipRealm = m_conf.readStr(keySipRealm);
+    if (m_sipRealm.empty())
+    {
+        ret = -1;
+        LOG(ERROR) << "sip realm is wrong";
+        return ret;
     }
     int num = m_conf.readInt(keySubNodeNum);
     SupNodeInfo info;

@@ -4,6 +4,9 @@
 #include "sipLocalConfig.h"
 #include "threadPool.h"
 #include "sipCore.h"
+#include <time.h>
+#include <random>
+#include <sstream>
 // 前置声明
 class GlobalControl;
 typedef struct _SubDomainInfo
@@ -16,6 +19,8 @@ typedef struct _SubDomainInfo
         protocal = 0;
         expire = 0;
         registered = false;
+        lastRegisterTime = 0;
+        auth = false;
     }
     bool operator==(std::string id)
     {
@@ -27,6 +32,8 @@ typedef struct _SubDomainInfo
     int protocal;
     int expire;
     bool registered;
+    time_t lastRegisterTime;
+    bool auth;
 } SubDomainInfo;
 typedef std::list<SubDomainInfo> SUBDOMAININFOLISTS;
 #define GOBJ(obj) GlobalControl::instance()->obj
@@ -57,6 +64,10 @@ public:
 public:
     static bool checkIsExist(std::string id);
     static void setExpires(std::string id, int expires);
+    static void setRegister(string id, bool registered);
+    static void setLastRegTime(string id, time_t t);
+    static bool getAuth(string id);
+    static string randomNum(int length);
 
 private:
     GlobalControl(){};

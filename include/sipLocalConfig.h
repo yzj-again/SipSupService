@@ -22,6 +22,7 @@ public:
     int ReadConf();
     inline std::string localIp() { return m_localIp; }
     inline int sipPort() { return m_sipPort; }
+    inline std::string realm() { return m_sipRealm; }
     std::list<SupNodeInfo> supNodeInfoList;
 
 private:
@@ -31,6 +32,7 @@ private:
     std::string m_sipId;
     std::string m_sipIp;
     int m_sipPort;
+    std::string m_sipRealm;
     std::string m_subNodeIp;
     int m_subNodePort;
     int m_subNodePoto;
